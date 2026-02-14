@@ -1,26 +1,14 @@
-// server/db.js
-const { MongoClient } = require("mongodb");
-const dotenv = require("dotenv");
-dotenv.config();
+const mongoose = require('mongoose');
 
-const client = new MongoClient(process.env.MONGO_URI);
-
-let db;
-
-async function connectDB() {
+const connectDB = async () => {
   try {
-    await client.connect();
-    db = client.db("hostel_db");
-    console.log("Connected to MongoDB");
-  } catch (err) {
-    console.error("MongoDB connection error:", err);
+    const conn = await mongoose.connect(process.env.MONGO_URI);
+
+    console.log(`MongoDB connected: ${conn.connection.host}`);
+  } catch (error) {
+    console.error('MongoDB connection failed:', error.message);
+    process.exit(1);
   }
-}
+};
 
-// Export function to get collections
-function getCollection(name) {
-  if (!db) throw new Error("Database not connected yet!");
-  return db.collection(name);
-}
-
-module.exports = { connectDB, getCollection };
+module.exports = connectDB;

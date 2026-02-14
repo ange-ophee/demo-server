@@ -1,13 +1,13 @@
 // server/routes/studentRoutes.js
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const studentController = require("../controllers/studentController");
-const authMiddleware = require("../middleware/authMiddleware");
+const { submitRequest, viewRequest } = require('../controllers/studentController');
+const { verifyToken, isStudent} = require('../middleware/authMiddleware');
 
-router.use(authMiddleware.verifyToken);
-router.use(authMiddleware.isStudent);
+router.use(verifyToken);
+router.use(isStudent);
 
-router.post("/request", studentController.submitRequest);
-router.get("/request", studentController.viewRequest);
+router.post('/request', submitRequest);
+router.get('request', viewRequest);
 
 module.exports = router;

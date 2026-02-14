@@ -1,22 +1,24 @@
 // server/server.js
-const express = require("express");
-const dotenv = require("dotenv");
-const { connectDB } = require("./db");
-const cors = require("cors");
-const swaggerUi = require("swagger-ui-express");
-const swaggerJsdoc = require("swagger-jsdoc");
+const express = require('express');
+const dotenv = require('dotenv');
+const connectDB = require('./db');
+const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
+
+const authRoutes = require('./routes/authRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const studentRoutes = require('./routes/studentRoutes');
 
 dotenv.config();
+
+connectDB();
+
 const app = express();
 
 // --- Middleware ---
 app.use(cors());
 app.use(express.json());
-
-// --- Routes ---
-app.use("/auth", require("./routes/authRoutes"));
-app.use("/student", require("./routes/studentRoutes"));
-app.use("/admin", require("./routes/adminRoutes"));
 
 // --- Swagger ---
 const options = {
@@ -32,24 +34,34 @@ const options = {
         url: process.env.API_URL || 'https://demo-server-production-a2b9.up.railway.app/',
       },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat:'JWT',
+        },
+      },
+    },
   },
-  apis: ["./routes/*.js"],
+  apis: ['./routes/*.js'],
 };
 
 const specs = swaggerJsdoc(options);
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(specs));
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(specs));
 
-app.get("/", (_req, res) => {
-  res.json({ status: "Server is running 🚀" });
+// --- Routes ---
+app.use('/auth', authRoutes);
+app.use('/student', studentRoutes);
+app.use('/admin', adminRoutes);
+
+//Health check endpoint
+app.get('/', (_req, res) => {
+  res.send('Server is running 🚀');
 });
 
 // --- Start server ---
 const PORT = process.env.PORT || 4000;
-connectDB()
-  .then(() => {
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
-      console.log(`Swagger docs available at /docs`);
     });
-  })
-  .catch((err) => console.error("Failed to connect to MongoDB:", err));

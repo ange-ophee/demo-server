@@ -1,7 +1,7 @@
 // server/routes/authRoutes.js
-const express = require("express");
+const express = require('express');
+const { registerUser, loginUser } = require('../controllers/authController');
 const router = express.Router();
-const authController = require("../controllers/authController");
 
 /**
  * @swagger
@@ -10,7 +10,7 @@ const authController = require("../controllers/authController");
  *     summary: Register a new user
  *     tags: [Auth]
  */
-router.post("/register", authController.register);
-router.post("/login", authController.login);
+router.post('/register', registerUser);
+router.post('/login', loginUser);
 
 module.exports = router;

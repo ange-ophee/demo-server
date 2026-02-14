@@ -1,44 +1,24 @@
-// server/models/Request.js
-const { getCollection } = require("../db");
-const { ObjectId } = require("mongodb");
+const mongoose = require('mongoose');
 
-const Request = {
-  create: async (studentId) => {
-    return getCollection("requests").insertOne({
-      student_id: new ObjectId(studentId),
-      request_date: new Date(),
-      status: "Pending",
-    });
+const requestSchema = new mongoose.Schema(
+  {
+    student_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
+    request_date: { type: Date, default: Date.now },
   },
+  { timestamps: true }
+);
 
-  getByStudentId: async (studentId) => {
-    return getCollection("requests")
-      .find({ student_id: new ObjectId(studentId) })
-      .toArray();
-  },
-
-  getAll: async () => {
-    return getCollection("requests")
-      .aggregate([
-        {
-          $lookup: {
-            from: "users",
-            localField: "student_id",
-            foreignField: "_id",
-            as: "student",
-          },
-        },
-        { $unwind: "$student" },
-      ])
-      .toArray();
-  },
-
-  updateStatus: async (id, status) => {
-    return getCollection("requests").updateOne(
-      { _id: new ObjectId(id) },
-      { $set: { status } }
-    );
-  },
+requestSchema.statics.getByStudentId = function(studentId) {
+  return this.find({ student_id: studentId });
 };
 
-module.exports = Request;
+requestSchema.statics.getAllRequests = function() {
+  return this.find().populate('student_id', 'name email role');
+};
+
+requestSchema.statics.updateStatusById = function(id, status) {
+  return this.findByIdAndUpdate(id, { status }, { new: true });
+};
+
+module.exports = mongoose.model('Request', requestSchema);

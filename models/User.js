@@ -1,28 +1,26 @@
-// server/models/User.js
-const { getCollection } = require("../db");
-const bcrypt = require("bcryptjs");
-const { ObjectId } = require("mongodb");
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
-const User = {
-  create: async ({ name, email, password, role }) => {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const result = await getCollection("users").insertOne({
-      name,
-      email,
-      password: hashedPassword,
-      role,
-      createdAt: new Date(),
-    });
-    return result;
+const userSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    role: { type: String, enum: ['student', 'admin'], required: true },
   },
+  { timestamps: true }
+);
 
-  findByEmail: async (email) => {
-    return getCollection("users").findOne({ email });
-  },
+// Password hash middleware
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
 
-  findById: async (id) => {
-    return getCollection("users").findOne({ _id: new ObjectId(id) });
-  },
+// Static helper
+userSchema.statics.findByEmail = function(email) {
+  return this.findOne({ email });
 };
 
-module.exports = User;
+module.exports = mongoose.model('User', userSchema);
