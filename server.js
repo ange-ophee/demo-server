@@ -31,7 +31,7 @@ const options = {
     },
     servers: [
       {
-        url: process.env.API_URL || 'https://demo-server-production-a2b9.up.railway.app/',
+        url: process.env.API_URL || 'https://demo-server-production-395f.up.railway.app/',
       },
     ],
     components: {
