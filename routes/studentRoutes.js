@@ -1,13 +1,15 @@
 // server/routes/studentRoutes.js
 const express = require('express');
 const router = express.Router();
-const { submitRequest, viewRequest } = require('../controllers/studentController');
-const { verifyToken, isStudent} = require('../middleware/authMiddleware');
+const studentController = require('../controllers/studentController'); // import whole object
+const authMiddleware = require('../middleware/authMiddleware');        // import whole object
 
-router.use(verifyToken);
-router.use(isStudent);
+// Protect all student routes
+router.use(authMiddleware.verifyToken);
+router.use(authMiddleware.isStudent);
 
-router.post('/request', submitRequest);
-router.get('request', viewRequest);
+// Routes
+router.post('/request', studentController.submitRequest);
+router.get('/request', studentController.viewRequest); // fixed missing '/'
 
 module.exports = router;

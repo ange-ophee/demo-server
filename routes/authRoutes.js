@@ -1,7 +1,6 @@
-// server/routes/authRoutes.js
 const express = require('express');
-const { registerUser, loginUser } = require('../controllers/authController');
 const router = express.Router();
+const authController = require('../controllers/authController'); // correct import
 
 /**
  * @swagger
@@ -10,7 +9,7 @@ const router = express.Router();
  *     summary: Register a new user
  *     tags: [Auth]
  */
-router.post('/register', registerUser);
-router.post('/login', loginUser);
+router.post('/register', authController.register);
+router.post('/login', authController.login);
 
 module.exports = router;

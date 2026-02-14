@@ -1,14 +1,16 @@
 // server/routes/adminRoutes.js
 const express = require('express');
 const router = express.Router();
-const { getAllRequests, approveRequest, rejectRequest } = require('../controllers/adminController');
-const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
+const adminController = require('../controllers/adminController'); // import whole object
+const authMiddleware = require('../middleware/authMiddleware');    // import whole object
 
-router.use(verifyToken);
-router.use(isAdmin);
+// Protect all admin routes
+router.use(authMiddleware.verifyToken);
+router.use(authMiddleware.isAdmin);
 
-router.get('/requests', getAllRequests);
-router.patch('/request/:id/approve', approveRequest);
-router.patch('/request/:id/reject', rejectRequest);
+// Routes
+router.get('/requests', adminController.getAllRequests);
+router.patch('/request/:id/approve', adminController.approveRequest);
+router.patch('/request/:id/reject', adminController.rejectRequest);
 
 module.exports = router;
