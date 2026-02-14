@@ -28,7 +28,9 @@ const options = {
       description: "API documentation for DormMate project",
     },
     servers: [
-      { url: `https://school-server-production-c017.up.railway.app/` },
+      {
+        url: process.env.API_URL || 'https://demo-server-production-a2b9.up.railway.app/',
+      },
     ],
   },
   apis: ["./routes/*.js"],
@@ -37,13 +39,8 @@ const options = {
 const specs = swaggerJsdoc(options);
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(specs));
 
-// --- 404 handler ---
-app.use((_req, res) => {
-  res.status(404).json({ message: "Route not found" });
-});
-
 app.get("/", (_req, res) => {
-  res.json({ message: "Server is alive" });
+  res.json({ status: "Server is running 🚀" });
 });
 
 // --- Start server ---
