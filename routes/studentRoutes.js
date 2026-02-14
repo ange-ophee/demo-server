@@ -1,15 +1,45 @@
-// server/routes/studentRoutes.js
+/**
+ * @swagger
+ * tags:
+ *   name: Student
+ *   description: Student request management
+ */
+
 const express = require('express');
 const router = express.Router();
-const studentController = require('../controllers/studentController'); // import whole object
-const authMiddleware = require('../middleware/authMiddleware');        // import whole object
+const studentController = require('../controllers/studentController'); 
+const authMiddleware = require('../middleware/authMiddleware');
 
 // Protect all student routes
 router.use(authMiddleware.verifyToken);
 router.use(authMiddleware.isStudent);
 
-// Routes
+/**
+ * @swagger
+ * /student/request:
+ *   post:
+ *     summary: Submit a request
+ *     tags: [Student]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Request submitted successfully
+ */
 router.post('/request', studentController.submitRequest);
-router.get('/request', studentController.viewRequest); // fixed missing '/'
+
+/**
+ * @swagger
+ * /student/request:
+ *   get:
+ *     summary: View student request
+ *     tags: [Student]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Request fetched successfully
+ */
+router.get('/request', studentController.viewRequest);
 
 module.exports = router;
