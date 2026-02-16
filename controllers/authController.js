@@ -13,13 +13,7 @@ const authController = {
 
       const user = new User({ name, email, password, role });
       await user.save();
-      const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
-      res.status(201).json({
-        message: 'User registered successfully',
-        token,
-        role: user.role,
-        name: user.name,
-      });
+      res.json({ message: 'User registered successfully' });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
