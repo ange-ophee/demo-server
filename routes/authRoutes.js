@@ -9,7 +9,7 @@ const authController = require('../controllers/authController'); // correct impo
  *     summary: Register a new user
  *     tags: [Auth]
  */
-router.post('/register', authController.register);
-router.post('/login', authController.login);
+router.post('/auth/register', authController.register);
+router.post('/auth/login', authController.login);
 
 module.exports = router;
