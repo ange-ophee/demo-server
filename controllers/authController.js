@@ -5,17 +5,21 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const authController = {
-  register: async (req, res) => {
+  register: async (req, res, next) => { // <--- Added 'next' here
     try {
       const { name, email, password, role } = req.body;
       const existingUser = await User.findByEmail(email);
-      if (existingUser) return res.status(400).json({ message: 'Email already exists' });
+      if (existingUser) {
+        return res.status(400).json({ message: 'Email already exists' });
+      }
 
       const user = new User({ name, email, password, role });
-      await user.save();
+      await user.save(); // This triggers your pre('save') hook
       res.json({ message: 'User registered successfully' });
     } catch (err) {
-      res.status(500).json({ error: err.message });
+      // Pass the error to the next error-handling middleware
+      // This is the standard way to handle async errors in Express
+      next(err); // <--- Changed from res.status to next(err)
     }
   },
 
