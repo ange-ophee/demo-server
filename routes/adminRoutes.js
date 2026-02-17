@@ -1,12 +1,4 @@
 // server/routes/adminRoutes.js
-const express = require('express');
-const router = express.Router();
-const adminController = require('../controllers/adminController');
-const authMiddleware = require('../middleware/authMiddleware');
-
-router.use(authMiddleware.verifyToken);
-router.use(authMiddleware.isAdmin);
-
 /**
  * @swagger
  * tags:
@@ -30,7 +22,6 @@ router.use(authMiddleware.isAdmin);
  *       403:
  *         description: Forbidden (Not an admin)
  */
-router.get('/requests', authMiddleware.verifyToken, authMiddleware.isAdmin, adminController.getAllRequests);
 
 /**
  * @swagger
@@ -57,7 +48,6 @@ router.get('/requests', authMiddleware.verifyToken, authMiddleware.isAdmin, admi
  *       404:
  *         description: Request not found
  */
-router.patch('/request/:id/approve', authMiddleware.verifyToken, authMiddleware.isAdmin, adminController.approveRequest);
 
 /**
  * @swagger
@@ -84,6 +74,46 @@ router.patch('/request/:id/approve', authMiddleware.verifyToken, authMiddleware.
  *       404:
  *         description: Request not found
  */
-router.patch('/request/:id/reject', authMiddleware.verifyToken, authMiddleware.isAdmin, adminController.rejectRequest);
+
+const express = require('express');
+const router = express.Router();
+const jwt = require('jsonwebtoken');
+const AdminController = require('../controllers/adminController');
+
+router.get('/requests', async (req, res) => {
+  try {
+    const token = req.headers['authorization']?.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
+
+    await AdminController.getAllRequests(req, res);
+  } catch (err) {
+    return res.status(401).json({ message: 'Invalid token' });
+  }
+});
+
+router.patch('/request/:id/approve', async (req, res) => {
+  try {
+    const token = req.headers['authorization']?.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
+
+    await AdminController.approveRequest(req, res, req.params.id);
+  } catch (err) {
+    return res.status(401).json({ message: 'Invalid token' });
+  }
+});
+
+router.patch('/request/:id/reject', async (req, res) => {
+  try {
+    const token = req.headers['authorization']?.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
+
+    await AdminController.rejectRequest(req, res, req.params.id);
+  } catch (err) {
+    return res.status(401).json({ message: 'Invalid token' });
+  }
+});
 
 module.exports = router;

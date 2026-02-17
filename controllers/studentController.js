@@ -1,29 +1,21 @@
 const Request = require('../models/Request');
 
-const studentController = {
-  submitRequest: async (req, res) => {
-    try {
-      const student_id = req.user.id;
-      const existing = await Request.getByStudentId(student_id);
-      if (existing.length > 0) return res.status(400).json({ message: 'You already have a request' });
-
-      const request = new Request({ student_id });
-      await request.save();
-      res.json({ message: 'Request submitted successfully' });
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  },
-
-  viewRequest: async (req, res) => {
-    try {
-      const student_id = req.user.id;
-      const requests = await Request.getByStudentId(student_id);
-      res.json(requests[0] || null);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  },
+const submitRequest = async (_req, res, studentId) => {
+  try {
+    const newRequest = await Request.create({ student: studentId });
+    return res.status(201).json({ message: 'Request submitted', request: newRequest });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
 };
 
-module.exports = studentController;
+const viewRequest = async (_req, res, studentId) => {
+  try {
+    const requests = await Request.find({ student: studentId });
+    return res.json({ requests });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+module.exports = { submitRequest, viewRequest };
