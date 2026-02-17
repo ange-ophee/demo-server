@@ -1,7 +1,3 @@
-const express = require('express');
-const router = express.Router();
-const authController = require('../controllers/authController'); // correct import
-
 /**
  * @swagger
  * /auth/register:
@@ -9,6 +5,10 @@ const authController = require('../controllers/authController'); // correct impo
  *     summary: Register a new user
  *     tags: [Auth]
  */
+const express = require('express');
+const router = express.Router();
+const authController = require('../controllers/authController');
+
 router.post('/register', authController.register);
 router.post('/login', authController.login);
 

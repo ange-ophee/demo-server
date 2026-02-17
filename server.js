@@ -62,6 +62,10 @@ app.get('/', (_req, res) => {
 
 // --- Start server ---
 const PORT = process.env.PORT || 4000;
+app.use((err, _req, res, _next) => {
+  console.error("GLOBAL ERROR:", err);
+  res.status(500).json({ message: "Something went wrong" });
+});
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
-    });
+});

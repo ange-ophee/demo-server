@@ -1,43 +1,72 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const dotenv = require('dotenv');
-dotenv.config();
+require('dotenv').config();
 
 const authController = {
-  register: async (req, res, next) => { // <--- Added 'next' here
+
+  register: async (req, res) => {
     try {
       const { name, email, password, role } = req.body;
-      const existingUser = await User.findByEmail(email);
-      if (existingUser) {
-        return res.status(400).json({ message: 'Email already exists' });
+
+      if (!name || !email || !password || !role) {
+        return res.status(400).json({ message: "All fields are required" });
       }
 
-      const user = new User({ name, email, password, role });
-      await user.save(); // This triggers your pre('save') hook
-      res.json({ message: 'User registered successfully' });
-    } catch (err) {
-      // Pass the error to the next error-handling middleware
-      // This is the standard way to handle async errors in Express
-      next(err); // <--- Changed from res.status to next(err)
+      const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
+      if (existingUser) {
+        return res.status(400).json({ message: "Email already exists" });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const user = await User.create({
+        name,
+        email: email.toLowerCase().trim(),
+        password: hashedPassword,
+        role
+      });
+
+      return res.status(201).json({ message: "User registered successfully" });
+
+    } catch (error) {
+      console.error("REGISTER ERROR:", error);
+      return res.status(500).json({ message: error.message });
     }
   },
 
   login: async (req, res) => {
     try {
       const { email, password } = req.body;
-      const user = await User.findByEmail(email);
-      if (!user) return res.status(404).json({ message: 'User not found' });
+
+      const user = await User.findOne({ email: email.toLowerCase().trim() });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
 
       const match = await bcrypt.compare(password, user.password);
-      if (!match) return res.status(401).json({ message: 'Invalid credentials' });
+      if (!match) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
 
-      const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
-      res.json({ token, role: user.role, name: user.name });
-    } catch (err) {
-      res.status(500).json({ error: err.message });
+      const token = jwt.sign(
+        { id: user._id, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+
+      return res.json({
+        token,
+        role: user.role,
+        name: user.name
+      });
+
+    } catch (error) {
+      console.error("LOGIN ERROR:", error);
+      return res.status(500).json({ message: error.message });
     }
-  },
+  }
+
 };
 
 module.exports = authController;
