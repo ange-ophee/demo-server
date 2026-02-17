@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const requestSchema = new mongoose.Schema(
   {
     student_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'Pending' },
+    status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
     request_date: { type: Date, default: Date.now },
   },
   { timestamps: true }
