@@ -2,7 +2,7 @@ const Request = require('../models/Request');
 
 const getAllRequests = async (_req, res) => {
   try {
-    const requests = await Request.find().populate('student', 'name email');
+    const requests = await Request.find().populate('student_id', 'name email');
     return res.json({ requests });
   } catch (err) {
     return res.status(500).json({ message: err.message });
